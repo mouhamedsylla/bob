@@ -70,12 +70,20 @@ Pour Dockerfiles et docker-compose : utilise Context7 (resolve-library-id + get-
 Ces outils sont optionnels — si absents, continue sans.
 
 MIGRATIONS — RÈGLE ABSOLUE
-Les outils de migration (alembic, prisma, goose, django…) vivent DANS le container Docker, pas sur le VPS.
-pilot_deploy exécute les migrations via `docker compose run --rm` — c'est automatique, pilot s'en charge.
-N'utilise JAMAIS pilot_vps_exec pour installer ou lancer un outil de migration. Si les migrations échouent :
-  - Vérifie que l'image est à jour (pilot_push).
-  - Vérifie que .env.<env> contient DATABASE_URL.
-  - Ne tente pas d'installer l'outil sur le VPS host.
+Les migrations doivent être déclarées EXPLICITEMENT dans pilot.yaml. Pilot ne les auto-détecte pas.
+Si pilot_preflight affiche un hint "migration_hint", c'est un avertissement : l'utilisateur DOIT ajouter ceci dans pilot.yaml :
+
+  environments:
+    prod:
+      migrations:
+        tool: alembic          # ou prisma, goose, django…
+        command: "alembic -c migrations/alembic.ini upgrade head"  # la commande exacte à l'intérieur du container
+
+La commande est exécutée DANS le container Docker (via docker compose run --rm). L'outil doit être dans l'image.
+N'utilise JAMAIS pilot_vps_exec pour les migrations. Si elles échouent :
+  - Vérifie que la commande est correcte dans pilot.yaml (pilot_config_get pour voir la config).
+  - Vérifie que l'image est à jour (pilot_push si nécessaire).
+  - Vérifie que DATABASE_URL est dans .env.<env>.
 
 RÉSOLUTION DE PROBLÈMES SUR LE VPS
 pilot_vps_exec sert uniquement pour les outils système (nginx, curl, docker, systemd…), pas pour des dépendances applicatives.
