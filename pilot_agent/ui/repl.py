@@ -10,7 +10,6 @@ Principes d'affichage :
 from __future__ import annotations
 
 import asyncio
-import threading
 from typing import Any
 
 from prompt_toolkit import PromptSession
@@ -23,7 +22,6 @@ from rich.live import Live
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.spinner import Spinner
-from rich.table import Table
 from rich.text import Text
 
 from pilot_agent.gates.approval import ApprovalGate, ApprovalRequest
@@ -39,67 +37,54 @@ PT_STYLE = Style.from_dict({
 })
 
 
-# ── Signature animée ─────────────────────────────────────────────────────────
+# ── Bannière statique ────────────────────────────────────────────────────────
 
-_BOB_OPEN = """\
-  [dim]╭──────╮[/]
-  [dim]│[/] [cyan]◕[/]  [cyan]◕[/] [dim]│[/]
-  [dim]│[/]  [dim]╰─╯[/]  [dim]│[/]
-  [dim]╰──────╯[/]
-    [bold white]bob[/]
-"""
+def print_banner(model_id: str, project_name: str, active_env: str) -> None:
+    """
+    Bannière de démarrage bob — inspirée Pilot Fox.
 
-_BOB_BLINK = """\
-  [dim]╭──────╮[/]
-  [dim]│[/] [dim]─[/]  [dim]─[/] [dim]│[/]
-  [dim]│[/]  [dim]╰─╯[/]  [dim]│[/]
-  [dim]╰──────╯[/]
-    [bold white]bob[/]
-"""
+    ╭────────────────────────────────────────────────────────╮
+    │  ╭─╮╭─╮                                               │
+    │  ╰─╯╰─╯  bob  v0.1                                    │
+    │  █ ▘▝ █  claude-3-5-sonnet  ·  mon-projet  ·  prod    │
+    │                                                        │
+    │  Décris ce que tu veux faire  ·  Ctrl+D  ·  Ctrl+C    │
+    ╰────────────────────────────────────────────────────────╯
+    """
+    C = 56          # largeur du contenu (entre les │)
+    O = "color(208)"  # orange xterm-256
+    D = "dim"
 
+    def row(*segments: tuple[str, str]) -> Text:
+        """Ligne complète : │<contenu paddé à C chars>│"""
+        t = Text()
+        t.append("│", style=D)
+        body = Text()
+        for txt, sty in segments:
+            body.append(txt, style=sty)
+        pad = C - len(body.plain)
+        if pad > 0:
+            body.append(" " * pad)
+        t.append_text(body)
+        t.append("│", style=D)
+        return t
 
-async def print_signature() -> None:
-    """Affiche la signature animée de bob avec les yeux qui clignent."""
-    frames = [
-        _BOB_OPEN,
-        _BOB_BLINK,
-        _BOB_OPEN,
-        _BOB_BLINK,
-        _BOB_OPEN,
-    ]
-    delays = [0.5, 0.1, 0.6, 0.1, 0.3]
+    # Infos contextuelles — supprime le préfixe provider (ex: "anthropic/")
+    short_model = model_id.split("/")[-1] if "/" in model_id else model_id
+    info = f"{short_model}  ·  {project_name}  ·  {active_env}"
+    max_info = C - 11   # 11 = len("  █ ▘▝ █  ")
+    if len(info) > max_info:
+        info = info[:max_info - 1] + "…"
 
-    with Live(console=console, refresh_per_second=20, transient=True) as live:
-        for frame, delay in zip(frames, delays):
-            live.update(Text.from_markup(frame))
-            await asyncio.sleep(delay)
-
-
-# ── Header ────────────────────────────────────────────────────────────────────
-
-def print_header(model_id: str, project_name: str, active_env: str) -> None:
-    grid = Table.grid(expand=True)
-    grid.add_column()
-    grid.add_column(justify="right")
-    grid.add_row(
-        Text.assemble(("  bob", "bold white"), ("  v0.1", "dim")),
-        Text.assemble(
-            (f"{model_id}  ", "dim cyan"),
-            ("│  ", "dim"),
-            (f"{project_name}", "bold"),
-            ("  ·  ", "dim"),
-            (f"{active_env}", "green"),
-            ("  ", ""),
-        ),
-    )
-    console.print(Panel(grid, box=box.ROUNDED, border_style="bright_black", padding=(0, 0)))
     console.print()
-
-
-def print_welcome() -> None:
-    console.print(
-        "  [dim]Décris ce que tu veux faire · Ctrl+D pour quitter · Ctrl+C pour annuler[/]\n"
-    )
+    console.print(Text("  ╭" + "─" * C + "╮", style=D))
+    console.print(Text("  ") + row(("  ╭─╮╭─╮", O)))
+    console.print(Text("  ") + row(("  ╰─╯╰─╯  ", O), ("bob", "bold white"), ("  v0.1", D)))
+    console.print(Text("  ") + row(("  █ ▘▝ █  ", O), (info, D)))
+    console.print(Text("  ") + row())
+    console.print(Text("  ") + row(("  Décris ce que tu veux faire  ·  Ctrl+D  ·  Ctrl+C", D)))
+    console.print(Text("  ╰" + "─" * C + "╯", style=D))
+    console.print()
 
 
 # ── Callbacks d'affichage ─────────────────────────────────────────────────────
@@ -279,9 +264,7 @@ async def start_repl(
     active_env: str = "dev",
     max_steps: int = 20,
 ) -> None:
-    await print_signature()
-    print_header(provider.model_id, project_name, active_env)
-    print_welcome()
+    print_banner(provider.model_id, project_name, active_env)
 
     session: PromptSession = PromptSession(
         history=InMemoryHistory(), style=PT_STYLE
