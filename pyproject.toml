@@ -1,0 +1,37 @@
+[project]
+name = "pilot-agent"
+version = "0.1.0"
+description = "Agent IA pour pilot — orchestre ton infrastructure en langage naturel"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Mouhamed SYLLA", email = "mouhamedsylla@github.com" }]
+requires-python = ">=3.12"
+keywords = ["devops", "ai-agent", "infrastructure", "pilot", "llm"]
+dependencies = [
+    "anyio>=4.0.0",
+    "litellm>=1.83.0,<2.0.0",
+    "mcp>=1.0.0",
+    "prompt-toolkit>=3.0.0",
+    "rich>=13.0.0",
+    "typer>=0.12.0",
+]
+
+[project.scripts]
+pilot-agent = "pilot_agent.cli:app"
+
+[project.urls]
+Repository = "https://github.com/mouhamedsylla/pilot-agent"
+Issues     = "https://github.com/mouhamedsylla/pilot-agent/issues"
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# En CI, utilise : uv sync --require-hashes
+# pour vérifier l'intégrité SHA-256 de chaque dépendance.
+# Protège contre les attaques supply-chain (ex: litellm 1.82.7/1.82.8).
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
