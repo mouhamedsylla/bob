@@ -1,6 +1,6 @@
-# pilot-agent
+# bob
 
-Agent IA pour [pilot](https://github.com/mouhamedsylla/pilot) — orchestre ton infrastructure en langage naturel depuis le terminal.
+AI agent for [pilot](https://github.com/mouhamedsylla/pilot) — deploy and manage your infrastructure in plain language.
 
 ```
 ❯  déploie l'app en prod et vérifie que tout tourne
@@ -35,28 +35,28 @@ Agent IA pour [pilot](https://github.com/mouhamedsylla/pilot) — orchestre ton 
 ### Méthode recommandée — uv (rapide, isolé)
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/mouhamedsylla/pilot-agent/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/mouhamedsylla/bob/main/install.sh | sh
 ```
 
-Le script détecte automatiquement `uv`, `pipx` ou `pip` et installe pilot-agent depuis GitHub.
+Le script détecte automatiquement `uv`, `pipx` ou `pip` et installe bob depuis GitHub.
 
 ### Manuellement
 
 ```sh
 # uv (recommandé)
-uv tool install "git+https://github.com/mouhamedsylla/pilot-agent"
+uv tool install "git+https://github.com/mouhamedsylla/bob"
 
 # pipx
-pipx install "git+https://github.com/mouhamedsylla/pilot-agent"
+pipx install "git+https://github.com/mouhamedsylla/bob"
 
 # pip
-pip install --user "git+https://github.com/mouhamedsylla/pilot-agent"
+pip install --user "git+https://github.com/mouhamedsylla/bob"
 ```
 
 ### Vérifier l'installation
 
 ```sh
-pilot-agent --version
+bob --version
 ```
 
 Si la commande n'est pas trouvée, ajoute `~/.local/bin` à ton PATH :
@@ -70,7 +70,7 @@ source ~/.zshrc
 
 ## Configuration du LLM
 
-pilot-agent supporte plusieurs LLM via [litellm](https://github.com/BerriAI/litellm). Configure la clé du provider que tu utilises :
+bob supporte plusieurs LLM via [litellm](https://github.com/BerriAI/litellm). Configure la clé du provider que tu utilises :
 
 ```sh
 # Claude (défaut — recommandé)
@@ -103,7 +103,7 @@ Mets la variable dans ton `~/.zshrc` / `~/.bashrc` pour ne pas avoir à la re-sa
 cd mon-projet
 
 # 2. Lance le REPL interactif
-pilot-agent
+bob
 
 # 3. Décris ce que tu veux faire
 ❯  quel est l'état de mes services ?
@@ -116,16 +116,16 @@ pilot-agent
 
 ```sh
 # Pose une question directement
-pilot-agent "quel est l'état de mes services ?"
+bob "quel est l'état de mes services ?"
 
 # Avec un LLM différent
-pilot-agent "déploie en prod" --llm gpt4
+bob "déploie en prod" --llm gpt4
 
 # Depuis un autre répertoire
-pilot-agent "status" --dir /chemin/vers/mon-projet
+bob "status" --dir /chemin/vers/mon-projet
 
 # Auto-approuver les actions destructives (CI/CD)
-pilot-agent "déploie en prod" --yes
+bob "déploie en prod" --yes
 ```
 
 ---
@@ -133,7 +133,7 @@ pilot-agent "déploie en prod" --yes
 ## Référence des options
 
 ```
-pilot-agent [OBJECTIF] [OPTIONS]
+bob [OBJECTIF] [OPTIONS]
 ```
 
 | Option | Alias | Description | Défaut |
@@ -165,18 +165,18 @@ Ollama n'a pas de raccourci fixe — chaque installation a ses propres modèles.
 ollama list
 
 # Utilise celui que tu as
-pilot-agent --llm ollama/gemma3
-pilot-agent --llm ollama/llama3.2
-pilot-agent --llm ollama/mistral
+bob --llm ollama/gemma3
+bob --llm ollama/llama3.2
+bob --llm ollama/mistral
 ```
 
-Si tu tapes `--llm ollama` sans préciser le modèle, pilot-agent liste automatiquement les modèles disponibles sur ton Ollama.
+Si tu tapes `--llm ollama` sans préciser le modèle, bob liste automatiquement les modèles disponibles sur ton Ollama.
 
 Tu peux aussi passer n'importe quel identifiant litellm directement :
 
 ```sh
-pilot-agent --llm "anthropic/claude-opus-4"
-pilot-agent --llm "ollama/gemma3:27b"
+bob --llm "anthropic/claude-opus-4"
+bob --llm "ollama/gemma3:27b"
 ```
 
 ---
@@ -248,14 +248,14 @@ Certaines actions demandent une confirmation explicite avant d'être exécutées
 
 Actions concernées : `deploy`, `rollback`, `down`, `push`, `secrets inject`.
 
-Pour bypasser en CI/CD : `pilot-agent "..." --yes`
+Pour bypasser en CI/CD : `bob "..." --yes`
 
 ---
 
 ## Architecture
 
 ```
-pilot-agent
+bob
 ├── cli.py           — point d'entrée, mode REPL vs one-shot
 ├── loop/
 │   └── agent.py     — boucle Think / Act / Observe
@@ -275,7 +275,7 @@ L'agent se connecte au serveur MCP embarqué dans `pilot` (`pilot mcp serve`) et
 
 ## Sécurité
 
-- Les versions **1.82.7** et **1.82.8** de litellm contenaient du code malveillant (supply chain attack sur PyPI). pilot-agent est épinglé sur `>=1.83.0,<2.0.0`.
+- Les versions **1.82.7** et **1.82.8** de litellm contenaient du code malveillant (supply chain attack sur PyPI). bob est épinglé sur `>=1.83.0,<2.0.0`.
 - Utilise `uv` avec lockfile pour vérifier les hashes SHA-256 de toutes les dépendances en CI.
 
 ---
@@ -283,12 +283,12 @@ L'agent se connecte au serveur MCP embarqué dans `pilot` (`pilot mcp serve`) et
 ## Développement
 
 ```sh
-git clone https://github.com/mouhamedsylla/pilot-agent
-cd pilot-agent
+git clone https://github.com/mouhamedsylla/bob
+cd bob
 
 # Installation en mode éditable avec uv
 uv sync
-uv run pilot-agent
+uv run bob
 
 # Tests
 uv run pytest

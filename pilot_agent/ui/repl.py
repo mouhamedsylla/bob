@@ -46,7 +46,7 @@ def print_header(model_id: str, project_name: str, active_env: str) -> None:
     grid.add_column()
     grid.add_column(justify="right")
     grid.add_row(
-        Text.assemble(("  pilot-agent", "bold white"), ("  v0.1", "dim")),
+        Text.assemble(("  bob", "bold white"), ("  v0.1", "dim")),
         Text.assemble(
             (f"{model_id}  ", "dim cyan"),
             ("│  ", "dim"),

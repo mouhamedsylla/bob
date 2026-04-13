@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
-# pilot-agent — script d'installation
-# Usage : curl -fsSL https://raw.githubusercontent.com/mouhamedsylla/pilot-agent/main/install.sh | sh
+# bob — script d'installation
+# Usage : curl -fsSL https://raw.githubusercontent.com/mouhamedsylla/bob/main/install.sh | sh
 
 set -e
 
-REPO="https://github.com/mouhamedsylla/pilot-agent"
+REPO="https://github.com/mouhamedsylla/bob"
 MIN_PYTHON="3.12"
 
 # ── Couleurs ──────────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ warn()    { printf "${YELLOW}⚠${RESET}  %s\n" "$1"; }
 error()   { printf "${RED}✗${RESET}  %s\n" "$1" >&2; exit 1; }
 
 # ── Header ────────────────────────────────────────────────────────────────────
-printf "\n${BOLD}  pilot-agent installer${RESET}\n"
+printf "\n${BOLD}  bob installer${RESET}\n"
 printf "  Agent IA pour pilot — orchestre ton infra en langage naturel\n\n"
 
 # ── Vérification prérequis ────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ else
 fi
 
 # ── Installation ──────────────────────────────────────────────────────────────
-info "Installation de pilot-agent..."
+info "Installation de bob..."
 
 case "$INSTALLER" in
   uv)
@@ -75,10 +75,10 @@ case "$INSTALLER" in
 esac
 
 # ── Vérification ──────────────────────────────────────────────────────────────
-if command -v pilot-agent >/dev/null 2>&1; then
-  success "pilot-agent installé : $(pilot-agent --version 2>/dev/null || echo 'ok')"
+if command -v bob >/dev/null 2>&1; then
+  success "bob installé : $(bob --version 2>/dev/null || echo 'ok')"
 else
-  warn "pilot-agent installé mais pas dans le PATH."
+  warn "bob installé mais pas dans le PATH."
   printf "  Ajoute ceci à ton ~/.bashrc ou ~/.zshrc :\n"
   case "$INSTALLER" in
     uv)   printf '    export PATH="$HOME/.local/bin:$PATH"\n' ;;
@@ -94,5 +94,5 @@ printf "     ${CYAN}export ANTHROPIC_API_KEY=sk-ant-...${RESET}  # Claude (défa
 printf "     ${CYAN}export OPENAI_API_KEY=sk-...${RESET}          # GPT-4\n"
 printf "     ${CYAN}# Aucune clé pour Ollama (local)${RESET}\n\n"
 printf "  2. Lance l'agent depuis un projet pilot :\n"
-printf "     ${CYAN}cd mon-projet && pilot-agent${RESET}\n\n"
+printf "     ${CYAN}cd mon-projet && bob${RESET}\n\n"
 printf "  Docs : ${REPO}#readme\n\n"

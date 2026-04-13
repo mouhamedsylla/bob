@@ -15,8 +15,8 @@ import typer
 from rich.console import Console
 
 app = typer.Typer(
-    name="pilot-agent",
-    help="Agent IA pour pilot — orchestre l'infrastructure en langage naturel.",
+    name="bob",
+    help="bob — AI agent for pilot. Deploy and manage your infrastructure in plain language.",
     add_completion=False,
     invoke_without_command=True,
 )

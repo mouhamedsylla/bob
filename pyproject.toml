@@ -1,12 +1,12 @@
 [project]
-name = "pilot-agent"
+name = "bob"
 version = "0.1.0"
-description = "Agent IA pour pilot — orchestre ton infrastructure en langage naturel"
+description = "bob — AI agent for pilot. Deploy and manage your infrastructure in plain language."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Mouhamed SYLLA", email = "mouhamedsylla@github.com" }]
 requires-python = ">=3.12"
-keywords = ["devops", "ai-agent", "infrastructure", "pilot", "llm"]
+keywords = ["devops", "ai-agent", "infrastructure", "pilot", "llm", "bob"]
 dependencies = [
     "anyio>=4.0.0",
     "litellm>=1.83.0,<2.0.0",
@@ -17,11 +17,14 @@ dependencies = [
 ]
 
 [project.scripts]
-pilot-agent = "pilot_agent.cli:app"
+bob = "pilot_agent.cli:app"
 
 [project.urls]
-Repository = "https://github.com/mouhamedsylla/pilot-agent"
-Issues     = "https://github.com/mouhamedsylla/pilot-agent/issues"
+Repository = "https://github.com/mouhamedsylla/bob"
+Issues     = "https://github.com/mouhamedsylla/bob/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pilot_agent"]
 
 [build-system]
 requires      = ["hatchling"]
