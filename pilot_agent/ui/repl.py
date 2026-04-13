@@ -143,7 +143,7 @@ class ReplCallbacks:
             highlight=False,
         )
         if is_error:
-            snippet = result.strip().splitlines()[0][:120]
+            snippet = _error_snippet(result)
             console.print(f"     [dim red]{snippet}[/]\n", highlight=False)
 
     def on_message(self, message: str) -> None:
@@ -355,3 +355,27 @@ def _is_error_result(result: str) -> bool:
     """Détecte si le résultat d'un tool call indique une erreur."""
     lower = result.lower()
     return any(kw in lower for kw in ("error", "erreur", "failed", "failure", "exception", "traceback"))
+
+
+def _error_snippet(result: str, max_lines: int = 4, max_width: int = 120) -> str:
+    """
+    Extrait les lignes les plus utiles d'un résultat d'erreur pour l'affichage.
+
+    Stratégie : les messages wrapper (exit status 1, Tool failed…) sont en haut.
+    L'erreur réelle (ligne docker ERROR:, traceback Python, etc.) est en bas.
+    On remonte depuis la fin en cherchant des lignes significatives.
+    """
+    lines = [l.rstrip() for l in result.strip().splitlines() if l.strip()]
+    if not lines:
+        return result[:max_width]
+
+    # Cherche les lignes qui contiennent l'info utile (erreur concrète)
+    priority_keywords = ("error", "erreur", "exception", "traceback", "failed", "cannot", "no such", "denied")
+    priority = [l for l in lines if any(kw in l.lower() for kw in priority_keywords)]
+
+    # Prend les dernières lignes prioritaires — elles sont le plus spécifiques
+    chosen = priority[-max_lines:] if priority else lines[-max_lines:]
+
+    # Tronque chaque ligne individuelle
+    truncated = [l[:max_width] for l in chosen]
+    return "\n     ".join(truncated)
