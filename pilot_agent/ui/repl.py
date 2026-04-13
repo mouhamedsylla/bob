@@ -52,7 +52,7 @@ def print_banner(model_id: str, project_name: str, active_env: str) -> None:
     ╰────────────────────────────────────────────────────────╯
     """
     C = 56          # largeur du contenu (entre les │)
-    O = "color(208)"  # orange xterm-256
+    O = "color(226)"  # jaune SpongeBob xterm-256
     D = "dim"
 
     def row(*segments: tuple[str, str]) -> Text:
