@@ -17,6 +17,7 @@ import uuid
 import logging
 from typing import Any, Protocol, runtime_checkable
 
+import litellm
 from litellm import acompletion
 
 logger = logging.getLogger(__name__)
@@ -108,7 +109,18 @@ class LiteLLMProvider:
             params["tools"] = tools
             params["tool_choice"] = "auto"
 
-        resp = await acompletion(**params)
+        try:
+            resp = await acompletion(**params)
+        except litellm.AuthenticationError as e:
+            provider = self._model.split("/")[0] if "/" in self._model else self._model
+            raise RuntimeError(
+                f"Authentication failed for {provider}. "
+                f"Check that your API key is set and valid."
+            ) from e
+        except litellm.RateLimitError as e:
+            raise RuntimeError("Rate limit reached. Try again in a moment.") from e
+        except litellm.BadRequestError as e:
+            raise RuntimeError(f"Bad request: {e}") from e
         choice = resp.choices[0]
         msg = choice.message
 
