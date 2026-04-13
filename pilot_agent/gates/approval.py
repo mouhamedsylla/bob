@@ -69,6 +69,7 @@ _REASONS: dict[str, str] = {
     "pilot_down":           "Arrête les services. Interruption de service.",
     "pilot_push":           "Pousse une nouvelle image Docker sur le registry.",
     "pilot_secrets_inject": "Modifie des secrets d'environnement.",
+    "pilot_vps_exec":       "Exécute une commande SSH sur le VPS. Loggé dans .pilot/vps-audit.log.",
 }
 
 

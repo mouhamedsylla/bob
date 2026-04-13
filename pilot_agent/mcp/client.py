@@ -33,6 +33,7 @@ DESTRUCTIVE_TOOLS: frozenset[str] = frozenset({
     "pilot_down",
     "pilot_secrets_inject",
     "pilot_push",
+    "pilot_vps_exec",  # always requires human approval, no exceptions
 })
 
 # ── Virtual tools — gérés par le REPL, pas par un serveur MCP ────────────────

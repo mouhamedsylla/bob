@@ -65,6 +65,14 @@ Quand .env.<env> est manquant :
 GÉNÉRATION DE FICHIERS INFRA
 Pour Dockerfiles et docker-compose : utilise Context7 (resolve-library-id + get-library-docs) pour vérifier la syntaxe exacte.
 Ces outils sont optionnels — si absents, continue sans.
+
+RÉSOLUTION DE PROBLÈMES SUR LE VPS
+Si un outil est manquant sur le VPS (exit status 127) ou un service absent :
+  1. Identifie le package à installer (ex: goose → go install github.com/pressly/goose/v3/cmd/goose@latest).
+  2. Appelle pilot_vps_exec avec UNE SEULE commande d'installation.
+  3. Vérifie avec pilot_vps_exec que l'outil est disponible (<tool> --version).
+  4. Relance l'opération qui avait échoué.
+Règle absolue : une commande par appel pilot_vps_exec. Jamais de && entre commandes.
 """
 
 
