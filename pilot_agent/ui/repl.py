@@ -135,11 +135,21 @@ class ReplCallbacks:
         duration = (
             f"{elapsed_ms:.0f}ms" if elapsed_ms < 1000 else f"{elapsed_ms / 1000:.1f}s"
         )
+        is_error = _is_error_result(result)
+        icon = "[red]✗[/]" if is_error else "[green]✓[/]"
         console.print(
-            f"  [green]✓[/]  [bold]{name}[/][dim]{self._current_args_preview}[/]"
+            f"  {icon}  [bold]{name}[/][dim]{self._current_args_preview}[/]"
             f"  [dim]{duration}[/]",
             highlight=False,
         )
+        if is_error:
+            snippet = result.strip().splitlines()[0][:120]
+            console.print(f"     [dim red]{snippet}[/]\n", highlight=False)
+
+    def on_message(self, message: str) -> None:
+        """Affiche le raisonnement intermédiaire de bob (erreurs, plans de retry…)."""
+        self._stop_live()
+        console.print(f"\n  [dim cyan]↳[/]  [dim]{message}[/]\n", highlight=False)
 
     def on_tool_denied(self, name: str) -> None:
         self._stop_live()
@@ -296,6 +306,7 @@ async def start_repl(
         try:
             callbacks = AgentCallbacks(
                 on_thinking=cb.on_thinking,
+                on_message=cb.on_message,
                 on_tool_call=cb.on_tool_call,
                 on_tool_result=cb.on_tool_result,
                 on_tool_denied=cb.on_tool_denied,
@@ -338,3 +349,9 @@ def _has_markdown(text: str) -> bool:
     """Détecte si le texte contient du Markdown non-trivial."""
     import re
     return bool(re.search(r"[*_`#\[\]]", text))
+
+
+def _is_error_result(result: str) -> bool:
+    """Détecte si le résultat d'un tool call indique une erreur."""
+    lower = result.lower()
+    return any(kw in lower for kw in ("error", "erreur", "failed", "failure", "exception", "traceback"))

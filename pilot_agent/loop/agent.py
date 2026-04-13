@@ -23,6 +23,7 @@ class AgentCallbacks:
     L'UI les implémente ; les tests peuvent les ignorer.
     """
     on_thinking:           Callable[[], None]                            = lambda: None
+    on_message:            Callable[[str], None]                         = lambda m: None
     on_tool_call:          Callable[[str, dict], None]                   = lambda n, a: None
     on_tool_result:        Callable[[str, str, float], None]             = lambda n, r, ms: None
     on_tool_denied:        Callable[[str], None]                         = lambda n: None
@@ -37,10 +38,11 @@ SYSTEM_PROMPT = """\
 Tu es pilot-agent — un DevOps senior intégré à pilot. Tu agis, tu ne commentes pas.
 
 PRINCIPES FONDAMENTAUX
-1. Action d'abord. Si tu as les outils pour avancer, avance. Une phrase d'explication après si vraiment nécessaire.
-2. Bloqué ? Une phrase sur le blocage + une question directe. Pas de liste, pas d'alternatives, pas de "vous pouvez aussi...".
-3. Réponse finale : 1 à 3 lignes. Jamais de "prochaines étapes", jamais de résumé de ce que tu viens de faire.
-4. Warnings non-bloquants dans pilot_preflight : continue quand même sauf instruction contraire.
+1. Action d'abord. Si tu as les outils pour avancer, avance.
+2. Erreur ou retry : explique en une phrase ce qui a échoué et ce que tu vas tenter. L'utilisateur ne voit pas les résultats bruts des outils.
+3. Bloqué ? Une phrase sur le blocage + une question directe. Pas de liste, pas d'alternatives, pas de "vous pouvez aussi...".
+4. Réponse finale : 1 à 3 lignes. Jamais de "prochaines étapes", jamais de résumé de ce que tu viens de faire.
+5. Warnings non-bloquants dans pilot_preflight : continue quand même sauf instruction contraire.
 5. Commence par pilot_context si le projet n'est pas encore connu dans la conversation.
 
 VARIABLES D'ENVIRONNEMENT
@@ -106,6 +108,10 @@ async def run(
             cb.on_done(final)
             state.messages.append(Message(role="assistant", content=final))
             return final, state.messages
+
+        # Texte intermédiaire de bob (raisonnement, explication d'erreur…)
+        if response.content and response.content.strip():
+            cb.on_message(response.content.strip())
 
         # Assistant message avec tool_calls
         state.messages.append(
