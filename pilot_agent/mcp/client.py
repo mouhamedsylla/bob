@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
@@ -241,7 +242,7 @@ class Context7MCPClient:
             env=None,
         )
 
-        async with stdio_client(params) as (read, write):
+        async with stdio_client(params, errlog=open(os.devnull, "w")) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
                 resp = await session.list_tools()

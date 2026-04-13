@@ -22,6 +22,10 @@ app = typer.Typer(
 )
 console = Console()
 
+# Sous-commandes invalides courantes — afficher un message d'erreur clair
+_INVALID_GOALS = {"version", "help", "--help", "-h"}
+_VERSION = "0.1.0"
+
 # Raccourcis pour les LLMs cloud dont le nom de modèle est stable.
 # Pour Ollama, chaque installation est différente — pas de raccourci hardcodé :
 #   --llm ollama/deepseek-r1    --llm ollama/gemma3    --llm ollama/llama3.2
@@ -57,6 +61,12 @@ _STEPS_OPT = Annotated[int, typer.Option("--max-steps", help="Nombre max d'itér
 _NO_C7_OPT = Annotated[bool, typer.Option("--no-context7", help="Désactive Context7 (doc en ligne)")]
 
 
+_VERSION_OPT = Annotated[
+    bool,
+    typer.Option("--version", "-V", help="Affiche la version et quitte", is_eager=True),
+]
+
+
 @app.callback()
 def main(
     ctx: typer.Context,
@@ -66,6 +76,7 @@ def main(
     yes:         _YES_OPT   = False,
     max_steps:   _STEPS_OPT = 20,
     no_context7: _NO_C7_OPT = False,
+    version:     _VERSION_OPT = False,
 ) -> None:
     """
     Lance pilot-agent.
@@ -81,8 +92,21 @@ def main(
       pilot-agent "génère les fichiers d'infra" --llm ollama/gemma3
       pilot-agent "status" --no-context7
     """
+    if version:
+        console.print(f"  bob v{_VERSION}")
+        raise typer.Exit(0)
+
     if ctx.invoked_subcommand is not None:
         return
+
+    if goal and goal.lower() in _INVALID_GOALS:
+        console.print(
+            f"\n  [red]✗[/]  [bold]{goal!r}[/] n'est pas une commande valide.\n\n"
+            f"  Version :  [cyan]bob --version[/]\n"
+            f"  Aide    :  [cyan]bob --help[/]\n"
+            f"  REPL    :  [cyan]bob[/]\n"
+        )
+        raise typer.Exit(1)
 
     if dir:
         os.chdir(dir)
@@ -164,6 +188,14 @@ async def _start(
         raise typer.Exit(1)
     except KeyboardInterrupt:
         console.print("\n  [dim]Interrompu.[/]\n")
+    except BaseExceptionGroup as eg:
+        # anyio/MCP task group teardown errors — extrait le premier message utile
+        for exc in eg.exceptions:
+            cause = getattr(exc, "__cause__", exc)
+            msg = str(cause) or type(cause).__name__
+            if msg and "GeneratorExit" not in msg:
+                console.print(f"\n  [red]✗[/]  {msg}\n")
+                break
 
 
 def _ollama_hint() -> None:
