@@ -66,9 +66,18 @@ GÉNÉRATION DE FICHIERS INFRA
 Pour Dockerfiles et docker-compose : utilise Context7 (resolve-library-id + get-library-docs) pour vérifier la syntaxe exacte.
 Ces outils sont optionnels — si absents, continue sans.
 
+MIGRATIONS — RÈGLE ABSOLUE
+Les outils de migration (alembic, prisma, goose, django…) vivent DANS le container Docker, pas sur le VPS.
+pilot_deploy exécute les migrations via `docker compose run --rm` — c'est automatique, pilot s'en charge.
+N'utilise JAMAIS pilot_vps_exec pour installer ou lancer un outil de migration. Si les migrations échouent :
+  - Vérifie que l'image est à jour (pilot_push).
+  - Vérifie que .env.<env> contient DATABASE_URL.
+  - Ne tente pas d'installer l'outil sur le VPS host.
+
 RÉSOLUTION DE PROBLÈMES SUR LE VPS
-Si un outil est manquant sur le VPS (exit status 127) ou un service absent :
-  1. Identifie le package à installer (ex: goose → go install github.com/pressly/goose/v3/cmd/goose@latest).
+pilot_vps_exec sert uniquement pour les outils système (nginx, curl, docker, systemd…), pas pour des dépendances applicatives.
+Si un outil système est manquant (exit status 127) :
+  1. Identifie le package système à installer (ex: curl → apt-get install -y curl).
   2. Appelle pilot_vps_exec avec UNE SEULE commande d'installation.
   3. Vérifie avec pilot_vps_exec que l'outil est disponible (<tool> --version).
   4. Relance l'opération qui avait échoué.
