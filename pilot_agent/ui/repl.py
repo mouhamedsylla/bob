@@ -256,9 +256,9 @@ class ReplApprovalGate:
             )
         )
         answer = await asyncio.get_event_loop().run_in_executor(
-            None, lambda: input("  Confirmer ? [o/N]  ").strip().lower()
+            None, lambda: input("  Confirmer ? [O/n]  ").strip().lower()
         )
-        approved = answer in ("o", "oui", "y", "yes")
+        approved = answer in ("o", "oui", "y", "yes", "")
         console.print(
             f"  [green]✓ confirmé[/]\n" if approved else f"  [dim]annulé[/]\n"
         )
