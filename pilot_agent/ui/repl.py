@@ -39,6 +39,42 @@ PT_STYLE = Style.from_dict({
 })
 
 
+# ── Signature animée ─────────────────────────────────────────────────────────
+
+_BOB_OPEN = """\
+  [dim]╭──────╮[/]
+  [dim]│[/] [cyan]◕[/]  [cyan]◕[/] [dim]│[/]
+  [dim]│[/]  [dim]╰─╯[/]  [dim]│[/]
+  [dim]╰──────╯[/]
+    [bold white]bob[/]
+"""
+
+_BOB_BLINK = """\
+  [dim]╭──────╮[/]
+  [dim]│[/] [dim]─[/]  [dim]─[/] [dim]│[/]
+  [dim]│[/]  [dim]╰─╯[/]  [dim]│[/]
+  [dim]╰──────╯[/]
+    [bold white]bob[/]
+"""
+
+
+async def print_signature() -> None:
+    """Affiche la signature animée de bob avec les yeux qui clignent."""
+    frames = [
+        _BOB_OPEN,
+        _BOB_BLINK,
+        _BOB_OPEN,
+        _BOB_BLINK,
+        _BOB_OPEN,
+    ]
+    delays = [0.5, 0.1, 0.6, 0.1, 0.3]
+
+    with Live(console=console, refresh_per_second=20, transient=True) as live:
+        for frame, delay in zip(frames, delays):
+            live.update(Text.from_markup(frame))
+            await asyncio.sleep(delay)
+
+
 # ── Header ────────────────────────────────────────────────────────────────────
 
 def print_header(model_id: str, project_name: str, active_env: str) -> None:
@@ -243,6 +279,7 @@ async def start_repl(
     active_env: str = "dev",
     max_steps: int = 20,
 ) -> None:
+    await print_signature()
     print_header(provider.model_id, project_name, active_env)
     print_welcome()
 
