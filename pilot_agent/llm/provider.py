@@ -20,6 +20,12 @@ from typing import Any, Protocol, runtime_checkable
 import litellm
 from litellm import acompletion
 
+# Suppress litellm's built-in prints and info banners
+litellm.suppress_debug_info = True
+litellm.set_verbose = False
+logging.getLogger("litellm").setLevel(logging.CRITICAL)
+logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
+
 logger = logging.getLogger(__name__)
 
 
@@ -120,6 +126,13 @@ class LiteLLMProvider:
         except litellm.RateLimitError as e:
             raise RuntimeError("Rate limit reached. Try again in a moment.") from e
         except litellm.BadRequestError as e:
+            msg = str(e).lower()
+            if "authentication" in msg or "invalid" in msg and "api key" in msg:
+                provider = self._model.split("/")[0] if "/" in self._model else self._model
+                raise RuntimeError(
+                    f"Authentication failed for {provider}. "
+                    f"Check that your API key is set and valid."
+                ) from e
             raise RuntimeError(f"Bad request: {e}") from e
         choice = resp.choices[0]
         msg = choice.message
