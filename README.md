@@ -300,9 +300,3 @@ uv run pytest
 
 MIT — voir [LICENSE](LICENSE)
 
-
-
-  ╭─╮╭─╮   Changes   +0 -0
-  ╰─╯╰─╯   Requests  0 Premium (2m 20s)
-  █ ▘▝ █   Resume    copilot --resume
-   ▔▔▔▔
